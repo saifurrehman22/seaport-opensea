@@ -61,8 +61,11 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
-         rinkeby: {
-           url: `https://rinkeby.infura.io/v3/ba7297c239304dbba0e654a17405c263`,
+        // rinkeby: {
+          ropsten: {
+         //  url: `https://rinkeby.infura.io/v3/ba7297c239304dbba0e654a17405c263`,
+         url: `https://ropsten.infura.io/v3/3645482b8afb433c86c275cd7d35638f`,
+
            accounts: { mnemonic: MNEMONIC },
            gas: 2100000,
           gasPrice: 8000000000,

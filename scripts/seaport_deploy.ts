@@ -15,7 +15,7 @@ async function main(): Promise<void> {
     'Seaport',
   );
   
-  const seaPort: Contract = await nftMarketplace.deploy("0x14B85b494f0F9c8111A5Ac9c08fdF91Eb625fFa1",{gasPrice: 50000000000});
+  const seaPort: Contract = await nftMarketplace.deploy("0x6b03ECDdfBc230b51eF2cD716828c353AD13a6a8",{gasPrice: 50000000000});
   await seaPort.deployed();
   console.log('seaPort deployed to: ', seaPort.address);
 }

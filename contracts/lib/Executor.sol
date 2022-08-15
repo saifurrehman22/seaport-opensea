@@ -14,6 +14,7 @@ import { Verifiers } from "./Verifiers.sol";
 import { TokenTransferrer } from "./TokenTransferrer.sol";
 
 import "./ConsiderationConstants.sol";
+import "hardhat/console.sol";
 
 /**
  * @title Executor
@@ -129,8 +130,10 @@ contract Executor is Verifiers, TokenTransferrer {
         uint256 amount,
         bytes32 conduitKey
     ) internal {
+        console.log("now inside _transferIndividual721Or1155Item");
         // Determine if the transfer is to be performed via a conduit.
         if (conduitKey != bytes32(0)) {
+            console.log("transfer is performing via with conduit");
             // Use free memory pointer as calldata offset for the conduit call.
             uint256 callDataOffset;
 
@@ -203,6 +206,9 @@ contract Executor is Verifiers, TokenTransferrer {
         } else {
             // Otherwise, determine whether it is an ERC721 or ERC1155 item.
             if (itemType == ItemType.ERC721) {
+
+                console.log("transfer is performing  without conduit");
+
                 // Ensure that exactly one 721 item is being transferred.
                 if (amount != 1) {
                     revert InvalidERC721TransferAmount();
@@ -508,6 +514,8 @@ contract Executor is Verifiers, TokenTransferrer {
         // Derive the address of the conduit using the conduit key.
         address conduit = _deriveConduit(conduitKey);
 
+        console.log("The derived conduit against conduitKey is :",conduit);
+
         bool success;
         bytes4 result;
 
@@ -529,12 +537,18 @@ contract Executor is Verifiers, TokenTransferrer {
 
             // Take value from scratch space and place it on the stack.
             result := mload(0)
+            
         }
+
+        console.log("The result is given :");
+        console.logBytes4(result);
 
         // If the call failed...
         if (!success) {
             // Pass along whatever revert reason was given by the conduit.
             _revertWithReasonIfOneIsReturned();
+
+            console.log("The call is :",success ,"to this conduit",conduit);
 
             // Otherwise, revert with a generic error.
             revert InvalidCallToConduit(conduit);
@@ -542,6 +556,16 @@ contract Executor is Verifiers, TokenTransferrer {
 
         // Ensure result was extracted and matches EIP-1271 magic value.
         if (result != ConduitInterface.execute.selector) {
+
+            console.log("The extracted result is given :");
+            console.logBytes4(result);
+
+            console.log("The ConduitInterface.execute.selector :");
+            console.logBytes4(ConduitInterface.execute.selector);
+
+            console.log("The ConduitI key is  :");
+            console.logBytes32(conduitKey);
+
             revert InvalidConduit(conduitKey, conduit);
         }
     }

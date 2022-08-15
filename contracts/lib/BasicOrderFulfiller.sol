@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import { ConduitInterface } from "../interfaces/ConduitInterface.sol";
+import "hardhat/console.sol";
 
 // prettier-ignore
 import {
@@ -70,6 +71,8 @@ contract BasicOrderFulfiller is OrderValidator {
     function _validateAndFulfillBasicOrder(
         BasicOrderParameters calldata parameters
     ) internal returns (bool) {
+
+        console.log("inside _validateAndFulfillBasicOrder");
         // Declare enums for order type & route to extract from basicOrderType.
         BasicOrderRouteType route;
         OrderType orderType;
@@ -78,6 +81,8 @@ contract BasicOrderFulfiller is OrderValidator {
         ItemType additionalRecipientsItemType;
 
         // Utilize assembly to extract the order type and the basic order route.
+        console.log("before going inside assebly _validateAndFulfillBasicOrder");
+
         assembly {
             // Read basicOrderType from calldata.
             let basicOrderType := calldataload(BasicOrder_basicOrderType_cdPtr)
@@ -104,10 +109,12 @@ contract BasicOrderFulfiller is OrderValidator {
                     iszero(callvalue())
                 )
             }
+            console.log("The payable status is ",correctPayableStatus);
 
             // Revert if msg.value has not been supplied as part of payable
             // routes or has been supplied as part of non-payable routes.
             if (!correctPayableStatus) {
+                console.log("The msg.value  is ",msg.value);
                 revert InvalidMsgValue(msg.value);
             }
         }
@@ -154,6 +161,7 @@ contract BasicOrderFulfiller is OrderValidator {
                     )
                 )
             }
+            console.log("before going inside _prepareBasicFulfillmentFromCalldata");
 
             // Derive & validate order using parameters and update order status.
             _prepareBasicFulfillmentFromCalldata(
@@ -169,6 +177,8 @@ contract BasicOrderFulfiller is OrderValidator {
         // Declare conduitKey argument used by transfer functions.
         bytes32 conduitKey;
 
+        
+
         // Utilize assembly to derive conduit (if relevant) based on route.
         assembly {
             // use offerer conduit for routes 0-3, fulfiller conduit otherwise.
@@ -179,6 +189,8 @@ contract BasicOrderFulfiller is OrderValidator {
                 )
             )
         }
+        console.log("the conduit key is given");
+        console.logBytes32(conduitKey);
 
         // Transfer tokens based on the route.
         if (additionalRecipientsItemType == ItemType.NATIVE) {
@@ -189,6 +201,8 @@ contract BasicOrderFulfiller is OrderValidator {
             ) {
                 revert UnusedItemParameters();
             }
+            
+            console.log("before going inside _transferIndividual721Or1155Item");
 
             // Transfer the ERC721 or ERC1155 item, bypassing the accumulator.
             _transferIndividual721Or1155Item(
@@ -319,17 +333,22 @@ contract BasicOrderFulfiller is OrderValidator {
         ItemType offeredItemType
     ) internal {
         // Ensure this function cannot be triggered during a reentrant call.
+        console.log("Before _setReentrancyGuard :");
+
         _setReentrancyGuard();
 
         // Ensure current timestamp falls between order start time and end time.
         _verifyTime(parameters.startTime, parameters.endTime, true);
+
+        console.log("After verifty time :");
 
         // Verify that calldata offsets for all dynamic types were produced by
         // default encoding. This ensures that the constants we use for calldata
         // pointers to dynamic types are the same as those calculated by
         // Solidity using their offsets. Also verify that the basic order type
         // is within range.
-        _assertValidBasicOrderParameters();
+
+        //_assertValidBasicOrderParameters();
 
         // Ensure supplied consideration array length is not less than original.
         _assertConsiderationLengthIsNotLessThanOriginalConsiderationLength(
@@ -806,6 +825,8 @@ contract BasicOrderFulfiller is OrderValidator {
                     EIP712_Order_size
                 )
             }
+            console.log("the order hash is :");
+            console.logBytes32(orderHash);
         }
 
         assembly {
@@ -903,8 +924,19 @@ contract BasicOrderFulfiller is OrderValidator {
             parameters.offerer,
             parameters.zone
         );
+        console.log("the orderhash is given");
+        console.logBytes32(orderHash);
+
+        console.log("the zoneHash is given");
+        console.logBytes32(parameters.zoneHash);
+
+        console.log("the offerer is :",parameters.offerer,
+            "the zone is :",parameters.zone);
 
         // Verify and update the status of the derived order.
+        console.log("the signature is given");
+        console.logBytes(parameters.signature);
+
         _validateBasicOrderAndUpdateStatus(
             orderHash,
             parameters.offerer,

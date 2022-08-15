@@ -10,6 +10,8 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
+    "@opensea/seaport-js": "^1.0.4",
+    "@openzeppelin/contracts-upgradeable": "^4.7.2",
     "ethers": "^5.5.3",
     "ethers-eip712": "^0.2.0",
     "hardhat": "https://github.com/0age/hardhat/releases/download/viaIR-2.9.3/hardhat-v2.9.3.tgz"

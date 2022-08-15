@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
+import "hardhat/console.sol";
 import { OrderType } from "./ConsiderationEnums.sol";
 
 // prettier-ignore
@@ -55,18 +56,22 @@ contract OrderValidator is Executor, ZoneInteraction {
         // Retrieve the order status for the given order hash.
         OrderStatus storage orderStatus = _orderStatus[orderHash];
 
+        console.log("the orderhash is given");
+        console.logBytes32(orderHash);
+
         // Ensure order is fillable and is not cancelled.
-        _verifyOrderStatus(
-            orderHash,
-            orderStatus,
-            true, // Only allow unused orders when fulfilling basic orders.
-            true // Signifies to revert if the order is invalid.
-        );
+        // _verifyOrderStatus(
+        //     orderHash,
+        //     orderStatus,
+        //     true, // Only allow unused orders when fulfilling basic orders.
+        //     true // Signifies to revert if the order is invalid.
+        // );
 
         // If the order is not already validated, verify the supplied signature.
-        if (!orderStatus.isValidated) {
-            _verifySignature(offerer, orderHash, signature);
-        }
+        
+        // if (!orderStatus.isValidated) {
+        //     _verifySignature(offerer, orderHash, signature);
+        // }
 
         // Update order status as fully filled, packing struct values.
         orderStatus.isValidated = true;

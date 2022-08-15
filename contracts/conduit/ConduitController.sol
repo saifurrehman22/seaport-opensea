@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
-
+import "hardhat/console.sol";
 // prettier-ignore
 import {
 	ConduitControllerInterface
@@ -25,10 +25,18 @@ contract ConduitController is ConduitControllerInterface {
     bytes32 internal immutable _CONDUIT_CREATION_CODE_HASH;
     bytes32 internal immutable _CONDUIT_RUNTIME_CODE_HASH;
 
+    // Set the conduit creator as an immutable argument.
+    address internal immutable _CONDUIT_CREATOR;
+
+    // Declare custom error for an invalid conduit creator.
+    error InvalidConduitCreator();
+
+
     /**
      * @dev Initialize contract by deploying a conduit and setting the creation
      *      code and runtime code hashes as immutable arguments.
      */
+
     constructor() {
         // Derive the conduit creation code hash and set it as an immutable.
         _CONDUIT_CREATION_CODE_HASH = keccak256(type(Conduit).creationCode);
@@ -38,7 +46,23 @@ contract ConduitController is ConduitControllerInterface {
 
         // Retrieve the conduit runtime code hash and set it as an immutable.
         _CONDUIT_RUNTIME_CODE_HASH = address(zeroConduit).codehash;
+
+        _CONDUIT_CREATOR = msg.sender;
     }
+
+    /**
+     * @notice Modifier to ensure that only the conduit creator can call a given
+     *         function.
+     */
+    modifier onlyCreator() {
+        // Ensure that the caller is the conduit creator.
+        if (msg.sender != _CONDUIT_CREATOR) {
+            revert InvalidConduitCreator();
+        }
+
+        // Proceed with function execution.
+        _;
+    }    
 
     /**
      * @notice Deploy a new conduit using a supplied conduit key and assigning
@@ -67,6 +91,10 @@ contract ConduitController is ConduitControllerInterface {
         // If the first 20 bytes of the conduit key do not match the caller...
         if (address(uint160(bytes20(conduitKey))) != msg.sender) {
             // Revert with an error indicating that the creator is invalid.
+            console.log("the msg.sender is :", msg.sender);
+            console.log("the conduitKey is :");
+            console.logBytes32(conduitKey);
+
             revert InvalidCreator();
         }
 

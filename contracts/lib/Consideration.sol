@@ -21,6 +21,7 @@ import {
 } from "./ConsiderationStructs.sol";
 
 import { OrderCombiner } from "./OrderCombiner.sol";
+import "hardhat/console.sol";
 
 /**
  * @title Consideration
@@ -80,6 +81,7 @@ contract Consideration is ConsiderationInterface, OrderCombiner {
         returns (bool fulfilled)
     {
         // Validate and fulfill the basic order.
+        console.log("starting & before _validateAndFulfillBasicOrder");
         fulfilled = _validateAndFulfillBasicOrder(parameters);
     }
 
